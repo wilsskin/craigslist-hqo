@@ -12,12 +12,12 @@
           { "id": "community_general", "label": "general" },
           { "id": "community_groups", "label": "groups" },
           { "id": "community_local_news", "label": "local news" },
-          { "id": "community_lost_found", "label": "lost+found" },
-          { "id": "community_missed_connections", "label": "missed connections" },
+          { "id": "community_lost_found", "label": "lost + found" },
+          { "id": "community_missed_connections", "label": "missed connection" },
           { "id": "community_musicians", "label": "musicians" },
           { "id": "community_pets", "label": "pets" },
           { "id": "community_politics", "label": "politics" },
-          { "id": "community_rants_raves", "label": "rants & raves" },
+          { "id": "community_rants_raves", "label": "rants + raves" },
           { "id": "community_rideshare", "label": "rideshare" },
           { "id": "community_volunteers", "label": "volunteers" }
         ]
@@ -33,7 +33,7 @@
           { "id": "services_creative", "label": "creative" },
           { "id": "services_cycle", "label": "cycle" },
           { "id": "services_event", "label": "event" },
-          { "id": "services_farm_garden", "label": "farm+garden" },
+          { "id": "services_farm_garden", "label": "farm+ garden" },
           { "id": "services_financial", "label": "financial" },
           { "id": "services_health_well", "label": "health/well" },
           { "id": "services_household", "label": "household" },
@@ -46,7 +46,7 @@
           { "id": "services_skilled_trade", "label": "skilled trade" },
           { "id": "services_sm_biz_ads", "label": "sm biz ads" },
           { "id": "services_travel_vac", "label": "travel/vac" },
-          { "id": "services_write_ed_tran", "label": "write/ed/tran" }
+          { "id": "services_write_ed_tran", "label": "write/ed/ tran" }
         ]
       },
       {

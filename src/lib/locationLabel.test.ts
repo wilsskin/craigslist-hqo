@@ -19,7 +19,7 @@ const nyc = city('city_nyc', 'New York City')
 describe('computeHeaderLocationLabel', () => {
   it('returns default label when selectedCities is empty', () => {
     const result = computeHeaderLocationLabel([], 10, false, 240, mockMeasure)
-    expect(result).toBe('Select location')
+    expect(result).toBe('select location')
   })
 
   it('returns city name with no radius suffix when hasEditedRadius is false', () => {

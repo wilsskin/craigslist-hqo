@@ -10,7 +10,7 @@
  */
 @theme {
   /* Colors - Surface & Neutral */
-  --color-bg-page: #FFFFFF;
+  --color-bg-page: #FCFBFA;
   --color-bg-subtle: #EEEEEE;
   --color-border-default: #EEEEEE;
   --color-border-emphasis: #727272;
@@ -177,4 +177,18 @@
   h3 {
     font-family: 'Open Sans', sans-serif;
   }
+}
+
+/*
+ * App container: single top-level wrapper for the entire page.
+ * Max-width 764px, centered, 24px horizontal padding. All sections (header, tabs, main) live inside this.
+ */
+.app-container {
+  max-width: 764px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  width: 100%;
+  background-color: var(--color-bg-page);
 }

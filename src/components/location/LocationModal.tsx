@@ -171,11 +171,12 @@ export function LocationModal({
               className="flex items-center mb-3"
               style={{
                 width: '100%',
+                height: '44px',
                 border: '1px solid #D0D0D0',
                 borderRadius: 'var(--radius-button)',
                 backgroundColor: '#FAFAFA',
-                minHeight: '44px',
-                marginTop: '16px', // 16px top padding above search bar
+                marginTop: '16px',
+                boxSizing: 'border-box',
               }}
             >
               <span
@@ -197,15 +198,19 @@ export function LocationModal({
                 placeholder={draftSelectedCities.length > 0 ? 'add city' : 'Search by city'}
                 value={draftModalCityQuery}
                 onChange={(e) => setDraftModalCityQuery(e.target.value)}
-                className="w-full py-2 text-base outline-none bg-transparent box-border"
+                className="w-full text-base outline-none bg-transparent box-border"
                 style={{
+                  height: '44px',
                   paddingLeft: '8px',
                   paddingRight: draftModalCityQuery ? '4px' : '12px',
+                  paddingTop: '14px',
+                  paddingBottom: '14px',
+                  lineHeight: 1,
                   fontFamily: '"Open Sans", sans-serif',
                   fontSize: '16px',
-                  lineHeight: 1,
                   color: 'var(--color-text-primary)',
                   border: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
               {draftModalCityQuery && (
@@ -214,6 +219,8 @@ export function LocationModal({
                   data-testid="modal-search-clear"
                   className="flex items-center justify-center shrink-0 cursor-pointer bg-transparent border-none p-0"
                   style={{
+                    width: '44px',
+                    height: '44px',
                     paddingRight: '10px',
                     color: 'var(--color-icon-default)',
                   }}
@@ -259,8 +266,10 @@ export function LocationModal({
                       type="button"
                       data-testid={`city-option-${city.id}`}
                       disabled={atMax}
-                      className="flex items-center justify-between py-2 px-3 text-sm text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center justify-between px-3 text-sm text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
+                        height: '44px',
+                        lineHeight: 1,
                         borderRadius: 'var(--radius-card)',
                         border: 'none',
                         background: 'transparent',
@@ -339,10 +348,11 @@ export function LocationModal({
                       <button
                         type="button"
                         data-testid={`chip-remove-${city.id}`}
-                        className="inline-flex items-center justify-center cursor-pointer bg-transparent border-none p-0"
+                        className="flex items-center justify-center cursor-pointer bg-transparent border-none p-0"
                         style={{
+                          width: '24px',
+                          height: '24px',
                           color: 'var(--color-text-secondary)',
-                          marginTop: '1px', // Slight vertical adjustment to center with text
                         }}
                         onClick={() => handleRemoveCity(city.id)}
                         aria-label={`Remove ${city.name}`}
@@ -417,15 +427,17 @@ export function LocationModal({
               <button
                 type="button"
                 data-testid="modal-apply"
-                className="w-full py-2 text-sm font-semibold text-white cursor-pointer transition-colors"
+                className="flex items-center justify-center w-full text-sm font-semibold text-white cursor-pointer transition-colors"
                 style={{
+                  height: '44px',
+                  lineHeight: 1,
                   backgroundColor: 'var(--color-link-default)',
                   borderRadius: 'var(--radius-button)',
                   border: 'none',
                   fontFamily: '"Open Sans", sans-serif',
                   transitionDuration: 'var(--duration-fast)',
                   transitionProperty: 'background-color',
-                  color: 'white', // Ensure text stays white
+                  color: 'white',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#0018B8' // Darker blue, only affects background
