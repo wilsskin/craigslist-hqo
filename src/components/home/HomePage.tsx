@@ -24,6 +24,7 @@ export function HomePage({ measureTextOverride }: HomePageProps = {}) {
   const [radiusMiles, setRadiusMiles] = useState<number>(DEFAULT_RADIUS_MILES)
   const [hasEditedRadius, setHasEditedRadius] = useState<boolean>(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState<boolean>(false)
+  const [locationJustApplied, setLocationJustApplied] = useState<boolean>(false)
   const [headerSearchQuery, setHeaderSearchQuery] = useState<string>('')
   const [modalCityQuery, setModalCityQuery] = useState<string>('')
   const [activeTab, setActiveTab] = useState<string>('community')
@@ -56,6 +57,8 @@ export function HomePage({ measureTextOverride }: HomePageProps = {}) {
           locationLabel={locationLabel}
           onLocationClick={() => setIsLocationModalOpen(true)}
           isLocationModalOpen={isLocationModalOpen}
+          locationJustApplied={locationJustApplied}
+          onLocationHighlightDismiss={() => setLocationJustApplied(false)}
         />
 
         <CategoryTabBar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -78,6 +81,7 @@ export function HomePage({ measureTextOverride }: HomePageProps = {}) {
         setHasEditedRadius={setHasEditedRadius}
         modalCityQuery={modalCityQuery}
         setModalCityQuery={setModalCityQuery}
+        onApply={() => setLocationJustApplied(true)}
       />
     </div>
   )

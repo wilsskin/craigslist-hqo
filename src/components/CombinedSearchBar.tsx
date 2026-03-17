@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, X, MapPin } from 'lucide-react'
 
-const TRANSITION_MS = 300
-const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)'
+/** Bar expand/collapse: slightly longer for a calm, modern feel (Material medium4) */
+const TRANSITION_MS = 400
+/** Gentle ease-out — smooth deceleration, no abrupt stop (cleaner feel) */
+const EASE_OUT = 'cubic-bezier(0.12, 0.6, 0.28, 1)'
 const ZONE_MIN_WIDTH = '100px'
-/** When expanded: search button width (32) + marginLeft (4) + marginRight (8) — location hover extends this far right to fill the bar */
-const EXPANDED_SEARCH_BUTTON_SPACE = 44
+const BORDER_FOCUS = '#BEBEBE'
+const BORDER_DEFAULT = '#E2E2E2'
 
 interface CombinedSearchBarProps {
   searchQuery: string
@@ -14,6 +16,9 @@ interface CombinedSearchBarProps {
   onLocationClick: () => void
   onSearchSubmit?: () => void
   isLocationModalOpen?: boolean
+  /** When true, bar stays expanded and location shows black until user clicks outside bar */
+  locationJustApplied?: boolean
+  onLocationHighlightDismiss?: () => void
 }
 
 export function CombinedSearchBar({
@@ -23,34 +28,32 @@ export function CombinedSearchBar({
   onLocationClick,
   onSearchSubmit,
   isLocationModalOpen = false,
+  locationJustApplied = false,
+  onLocationHighlightDismiss,
 }: CombinedSearchBarProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [hoverSearch, setHoverSearch] = useState(false)
+  const [barHovered, setBarHovered] = useState(false)
   const [hoverLocation, setHoverLocation] = useState(false)
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const barRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!isExpanded) return
+  const isExpanded =
+    barHovered ||
+    searchQuery.length > 0 ||
+    isLocationModalOpen ||
+    isSearchFocused ||
+    locationJustApplied
 
+  // When location was just applied, dismiss highlight on click outside the bar
+  useEffect(() => {
+    if (!locationJustApplied || !onLocationHighlightDismiss) return
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as Node
       if (barRef.current?.contains(target)) return
-      if (isLocationModalOpen) return
-      setIsExpanded(false)
+      onLocationHighlightDismiss()
     }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsExpanded(false)
-    }
-
     document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isExpanded, isLocationModalOpen])
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [locationJustApplied, onLocationHighlightDismiss])
 
   return (
     <div
@@ -61,13 +64,15 @@ export function CombinedSearchBar({
         gridTemplateColumns: `minmax(${ZONE_MIN_WIDTH}, 1fr) 1px minmax(${ZONE_MIN_WIDTH}, 1fr) auto`,
         maxWidth: isExpanded ? '352px' : '276px',
         height: '44px',
-        border: '1px solid #EEEEEE',
+        border: `1px solid ${isSearchFocused ? BORDER_FOCUS : BORDER_DEFAULT}`,
         borderRadius: '32px',
         backgroundColor: '#FFFFFF',
-        transition: `max-width ${TRANSITION_MS}ms ${EASE_OUT}`,
+        transition: `max-width ${TRANSITION_MS}ms ${EASE_OUT}, border-color 150ms ${EASE_OUT}`,
       }}
+      onMouseEnter={() => setBarHovered(true)}
+      onMouseLeave={() => setBarHovered(false)}
     >
-      {/* Left zone: 1fr so always same width as right zone. Hover layer from left edge to center, left rounded. */}
+      {/* Left zone: search input */}
       <div
         className="relative flex min-w-0 items-center"
         style={{
@@ -75,60 +80,43 @@ export function CombinedSearchBar({
           paddingLeft: '16px',
           paddingRight: isExpanded ? 0 : '8px',
         }}
-        onMouseEnter={() => setHoverSearch(true)}
-        onMouseLeave={() => setHoverSearch(false)}
       >
-        <span
-          className="pointer-events-none absolute"
-          style={{
-            top: -1,
-            left: -1,
-            right: -1,
-            bottom: 1,
-            borderRadius: '32px 0 0 32px',
-            backgroundColor: '#EEEEEE',
-            opacity: hoverSearch && !isSearchFocused ? 1 : 0,
-            transition: 'opacity 100ms cubic-bezier(0.16, 1, 0.3, 1)',
-            zIndex: 1,
-          }}
-        />
         <input
           type="text"
           data-testid="combined-search-input"
-          placeholder="search anything"
+          placeholder="search craigslist"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          onFocus={() => {
-            setIsExpanded(true)
-            setIsSearchFocused(true)
-          }}
+          onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && onSearchSubmit) onSearchSubmit()
           }}
-          className="relative z-10 flex-1 min-w-0 outline-none bg-transparent border-none"
+          className="relative z-10 flex-1 min-w-0 outline-none bg-transparent border-none placeholder:text-[#727272]"
           style={{
-            display: 'block',
-            paddingTop: 0,
-            paddingBottom: 0,
-            paddingLeft: 0,
-            paddingRight: 0,
+            height: '100%',
+            padding: 0,
+            margin: 0,
+            border: 0,
             fontFamily: '"Open Sans", sans-serif',
             fontSize: '14px',
+            lineHeight: '44px',
             color: 'var(--color-text-primary)',
             width: '100%',
             background: 'transparent',
             outline: 'none',
+            boxSizing: 'border-box',
           }}
         />
         {searchQuery && (
           <button
             type="button"
             data-testid="combined-search-clear"
-            className="relative z-10 flex shrink-0 items-center justify-center cursor-pointer border-none bg-transparent p-0"
+            className="relative z-10 flex shrink-0 items-center justify-center cursor-pointer border-none bg-transparent p-0 self-center"
             style={{
               width: '44px',
               height: '44px',
+              minHeight: '44px',
               color: '#727272',
             }}
             onClick={() => onSearchChange('')}
@@ -139,8 +127,9 @@ export function CombinedSearchBar({
         )}
       </div>
 
-      {/* Divider: grid column is 1px wide */}
+      {/* Divider: grid column is 1px wide, vertically centered */}
       <div
+        className="self-center"
         style={{
           width: '1px',
           height: '20px',
@@ -149,27 +138,13 @@ export function CombinedSearchBar({
         }}
       />
 
-      {/* Right zone: 1fr so always same width as left zone. Hover layer from center to right edge, right rounded. */}
+      {/* Right zone: location — icon and label grey by default, black on hover */}
       <div
-        className="relative flex min-w-0"
-        style={{ minWidth: 0 }}
+        className="relative flex min-w-0 items-center"
+        style={{ minWidth: 0, height: '44px' }}
         onMouseEnter={() => setHoverLocation(true)}
         onMouseLeave={() => setHoverLocation(false)}
       >
-        <span
-          className="pointer-events-none absolute"
-          style={{
-            top: -1,
-            left: -1,
-            right: isExpanded ? -EXPANDED_SEARCH_BUTTON_SPACE : -1,
-            bottom: 1,
-            borderRadius: '0 32px 32px 0',
-            backgroundColor: '#EEEEEE',
-            opacity: hoverLocation ? 1 : 0,
-            transition: 'opacity 100ms cubic-bezier(0.16, 1, 0.3, 1), right 200ms cubic-bezier(0.16, 1, 0.3, 1)',
-            zIndex: 1,
-          }}
-        />
         <button
           type="button"
           data-testid="combined-search-location"
@@ -185,19 +160,25 @@ export function CombinedSearchBar({
             backgroundColor: 'transparent',
             borderRadius: 0,
           }}
-          onClick={() => {
-            setIsExpanded(true)
-            onLocationClick()
-          }}
+          onClick={onLocationClick}
         >
-          <MapPin size={14} style={{ color: '#191919', flexShrink: 0 }} />
+          <MapPin
+            size={14}
+            style={{
+              color: hoverLocation || locationJustApplied ? '#191919' : '#727272',
+              flexShrink: 0,
+              display: 'block',
+              transition: 'color 150ms cubic-bezier(0.05, 0.7, 0.1, 1)',
+            }}
+          />
           <span
             className="min-w-0 truncate text-left"
             style={{
               fontFamily: '"Open Sans", sans-serif',
               fontSize: '14px',
               lineHeight: 1,
-              color: '#191919',
+              color: hoverLocation || locationJustApplied ? '#191919' : '#727272',
+              transition: 'color 150ms cubic-bezier(0.05, 0.7, 0.1, 1)',
             }}
           >
             {locationLabel}
@@ -209,7 +190,7 @@ export function CombinedSearchBar({
       <button
         type="button"
         data-testid="combined-search-submit"
-        className="relative z-10 flex shrink-0 cursor-pointer items-center justify-center overflow-hidden border-none bg-transparent p-0"
+        className="relative z-10 flex shrink-0 cursor-pointer items-center justify-center overflow-hidden border-none bg-transparent p-0 self-center"
         style={{
           width: isExpanded ? 32 : 0,
           minWidth: isExpanded ? 32 : 0,
@@ -219,18 +200,13 @@ export function CombinedSearchBar({
           opacity: isExpanded ? 1 : 0,
           borderRadius: '50%',
           backgroundColor: 'var(--color-link-default)',
-          transition: `width ${TRANSITION_MS}ms ${EASE_OUT}, min-width ${TRANSITION_MS}ms ${EASE_OUT}, opacity ${TRANSITION_MS}ms ${EASE_OUT}, margin ${TRANSITION_MS}ms ${EASE_OUT}, background-color 100ms ${EASE_OUT}`,
-        }}
-        onMouseEnter={(e) => {
-          if (isExpanded) e.currentTarget.style.backgroundColor = '#0019b8'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--color-link-default)'
+          transform: 'translateY(-1px)',
+          transition: `width ${TRANSITION_MS}ms ${EASE_OUT}, min-width ${TRANSITION_MS}ms ${EASE_OUT}, opacity ${TRANSITION_MS}ms ${EASE_OUT}, margin ${TRANSITION_MS}ms ${EASE_OUT}`,
         }}
         onClick={onSearchSubmit}
         aria-label="Search"
       >
-        <Search size={14} style={{ color: '#FFFFFF', flexShrink: 0 }} />
+        <Search size={14} style={{ color: '#FFFFFF', flexShrink: 0, display: 'block' }} />
       </button>
     </div>
   )

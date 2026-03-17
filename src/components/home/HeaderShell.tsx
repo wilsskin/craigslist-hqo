@@ -8,6 +8,8 @@ interface HeaderShellProps {
   locationLabel: string
   onLocationClick: () => void
   isLocationModalOpen?: boolean
+  locationJustApplied?: boolean
+  onLocationHighlightDismiss?: () => void
 }
 
 export function HeaderShell({
@@ -16,6 +18,8 @@ export function HeaderShell({
   locationLabel,
   onLocationClick,
   isLocationModalOpen = false,
+  locationJustApplied = false,
+  onLocationHighlightDismiss,
 }: HeaderShellProps) {
   return (
     <header
@@ -47,6 +51,8 @@ export function HeaderShell({
             locationLabel={locationLabel}
             onLocationClick={onLocationClick}
             isLocationModalOpen={isLocationModalOpen}
+            locationJustApplied={locationJustApplied}
+            onLocationHighlightDismiss={onLocationHighlightDismiss}
           />
         </div>
 
@@ -89,7 +95,7 @@ export function HeaderShell({
                 pointerEvents: 'none',
               }}
             />
-            <span className="relative z-10" style={{ transform: 'translateX(-4px)' }}>Post an ad</span>
+            <span className="relative z-10" style={{ transform: 'translateX(-4px)' }}>post an ad</span>
           </button>
           <button
             type="button"
