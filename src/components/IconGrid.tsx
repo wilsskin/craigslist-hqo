@@ -10,52 +10,54 @@ function IconCard({ item, sectionId }: TabItem) {
 
   return (
     <div
-      className="flex flex-col items-center w-full"
-      style={{ gap: '4px', maxWidth: '72px' }}
+      className="flex flex-col items-center justify-center cursor-pointer box-border"
+      style={{
+        width: '76px',
+        minHeight: '76px',
+        padding: '16px 2px',
+        gap: '4px',
+        border: '1px solid transparent',
+        borderRadius: '8px',
+        backgroundColor: '#F7F7F7',
+        boxShadow: '0 0px 2px 0 rgba(0, 0, 0, 0.05)',
+        transition:
+          'background-color 100ms cubic-bezier(0.16, 1, 0.3, 1), border-color 100ms cubic-bezier(0.16, 1, 0.3, 1)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#F3F3F3'
+        e.currentTarget.style.borderColor = '#EEEEEE'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#F7F7F7'
+        e.currentTarget.style.borderColor = 'transparent'
+      }}
     >
-      <div
-        className="flex items-center justify-center w-full cursor-pointer"
-        style={{
-          aspectRatio: '1',
-          border: '1px solid #EEEEEE',
-          borderRadius: '12px',
-          backgroundColor: 'transparent',
-          transition: 'background-color 100ms cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#F3F3F3'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-        }}
-      >
-        {iconUrl ? (
-          <img
-            src={iconUrl}
-            alt=""
-            width={28}
-            height={28}
-            className="shrink-0"
-            style={{ filter: 'brightness(0) saturate(100%) invert(50%)' }}
-            draggable={false}
-          />
-        ) : (
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              backgroundColor: '#EEEEEE',
-            }}
-          />
-        )}
-      </div>
+      {iconUrl ? (
+        <img
+          src={iconUrl}
+          alt=""
+          width={24}
+          height={24}
+          className="shrink-0"
+          style={{ filter: 'brightness(0) saturate(100%) invert(50%)' }}
+          draggable={false}
+        />
+      ) : (
+        <div
+          style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '4px',
+            backgroundColor: '#EEEEEE',
+          }}
+        />
+      )}
       <span
         className="text-center w-full block"
         style={{
           fontFamily: '"Open Sans", sans-serif',
-          fontSize: '13px',
-          lineHeight: 1.4,
+          fontSize: '12px',
+          lineHeight: 1.15,
           color: 'var(--color-text-secondary)',
           wordBreak: 'break-word',
           overflowWrap: 'break-word',
@@ -74,7 +76,8 @@ export function IconGrid({ items }: IconGridProps) {
       style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(8, 1fr)',
-        gap: '24px 20px',
+        gap: '24px 16px',
+        alignItems: 'start',
       }}
     >
       {items.map(({ item, sectionId }) => (

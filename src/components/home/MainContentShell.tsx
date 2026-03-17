@@ -27,7 +27,7 @@ export function MainContentShell({
     <main
       data-testid="main-content-shell"
       className="w-full"
-      style={{ paddingTop: '24px', paddingBottom: '64px' }}
+      style={{ paddingTop: '16px', paddingBottom: '64px' }}
     >
       {/* Empty state */}
       {searchQuery && filtered.length === 0 ? (

@@ -55,6 +55,7 @@ export function HomePage({ measureTextOverride }: HomePageProps = {}) {
           onSearchQueryChange={setHeaderSearchQuery}
           locationLabel={locationLabel}
           onLocationClick={() => setIsLocationModalOpen(true)}
+          isLocationModalOpen={isLocationModalOpen}
         />
 
         <CategoryTabBar activeTab={activeTab} onTabChange={setActiveTab} />

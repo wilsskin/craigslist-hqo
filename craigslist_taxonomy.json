@@ -12,12 +12,12 @@
           { "id": "community_general", "label": "general" },
           { "id": "community_groups", "label": "groups" },
           { "id": "community_local_news", "label": "local news" },
-          { "id": "community_lost_found", "label": "lost + found" },
-          { "id": "community_missed_connections", "label": "missed connection" },
+          { "id": "community_lost_found", "label": "lost+found" },
+          { "id": "community_missed_connections", "label": "missed" },
           { "id": "community_musicians", "label": "musicians" },
           { "id": "community_pets", "label": "pets" },
           { "id": "community_politics", "label": "politics" },
-          { "id": "community_rants_raves", "label": "rants + raves" },
+          { "id": "community_rants_raves", "label": "rants+raves" },
           { "id": "community_rideshare", "label": "rideshare" },
           { "id": "community_volunteers", "label": "volunteers" }
         ]

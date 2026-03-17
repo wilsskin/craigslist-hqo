@@ -7,6 +7,7 @@ interface HeaderShellProps {
   onSearchQueryChange: (query: string) => void
   locationLabel: string
   onLocationClick: () => void
+  isLocationModalOpen?: boolean
 }
 
 export function HeaderShell({
@@ -14,6 +15,7 @@ export function HeaderShell({
   onSearchQueryChange,
   locationLabel,
   onLocationClick,
+  isLocationModalOpen = false,
 }: HeaderShellProps) {
   return (
     <header
@@ -26,9 +28,9 @@ export function HeaderShell({
         backgroundColor: 'var(--color-bg-page)',
       }}
     >
-      <div className="w-full flex items-center gap-4" style={{ height: '64px', paddingTop: '16px', paddingBottom: '16px', boxSizing: 'border-box' }}>
+      <div className="w-full flex items-center gap-4" style={{ paddingTop: '16px', paddingBottom: '16px', boxSizing: 'border-box' }}>
         {/* Logo */}
-        <div className="shrink-0" data-testid="header-logo-area" style={{ maxWidth: '120px' }}>
+        <div className="shrink-0" data-testid="header-logo-area" style={{ maxWidth: '117px' }}>
           <img
             src={craigslistLogo}
             alt="craigslist"
@@ -44,6 +46,7 @@ export function HeaderShell({
             onSearchChange={onSearchQueryChange}
             locationLabel={locationLabel}
             onLocationClick={onLocationClick}
+            isLocationModalOpen={isLocationModalOpen}
           />
         </div>
 
@@ -56,16 +59,37 @@ export function HeaderShell({
           <button
             type="button"
             data-testid="header-post-ad-button"
-            className="flex items-center justify-center cursor-pointer border-none bg-transparent p-0 font-semibold"
+            className="relative flex items-center justify-center cursor-pointer border-none bg-transparent p-0 font-semibold"
             style={{
               lineHeight: 1,
               fontFamily: '"Open Sans", sans-serif',
               fontSize: '14px',
               color: 'var(--color-text-primary)',
             }}
+            onMouseEnter={(e) => {
+              const bg = e.currentTarget.querySelector('.hover-bg') as HTMLElement
+              if (bg) bg.style.opacity = '1'
+            }}
+            onMouseLeave={(e) => {
+              const bg = e.currentTarget.querySelector('.hover-bg') as HTMLElement
+              if (bg) bg.style.opacity = '0'
+            }}
             onClick={() => console.log('[header] Post an ad clicked')}
           >
-            Post an ad
+            <span
+              className="hover-bg absolute rounded-[36px]"
+              style={{
+                top: '-11px',
+                right: '-8px',
+                bottom: '-11px',
+                left: '-16px',
+                backgroundColor: 'var(--color-bg-subtle)',
+                opacity: 0,
+                transition: 'opacity var(--duration-fast) var(--ease-primary)',
+                pointerEvents: 'none',
+              }}
+            />
+            <span className="relative z-10" style={{ transform: 'translateX(-4px)' }}>Post an ad</span>
           </button>
           <button
             type="button"
