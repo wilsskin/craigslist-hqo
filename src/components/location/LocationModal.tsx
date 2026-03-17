@@ -12,6 +12,10 @@ import {
 import { LocationMap } from './LocationMap'
 
 const MAX_CITIES = 3
+/** Match CombinedSearchBar focus border colors and easing */
+const MODAL_SEARCH_BORDER_FOCUS = '#BEBEBE'
+const MODAL_SEARCH_BORDER_DEFAULT = '#E2E2E2'
+const MODAL_SEARCH_BORDER_EASE = 'cubic-bezier(0.12, 0.6, 0.28, 1)'
 
 interface LocationModalProps {
   open: boolean
@@ -24,6 +28,8 @@ interface LocationModalProps {
   setHasEditedRadius: React.Dispatch<React.SetStateAction<boolean>>
   modalCityQuery: string
   setModalCityQuery: React.Dispatch<React.SetStateAction<string>>
+  /** Called when Apply is clicked (after state is applied and modal closes) */
+  onApply?: () => void
 }
 
 export function LocationModal({
@@ -37,12 +43,14 @@ export function LocationModal({
   setHasEditedRadius,
   modalCityQuery,
   setModalCityQuery,
+  onApply,
 }: LocationModalProps) {
   // Draft state - only applied when "Apply" is clicked
   const [draftSelectedCities, setDraftSelectedCities] = useState<City[]>(selectedCities)
   const [draftRadiusMiles, setDraftRadiusMiles] = useState(radiusMiles)
   const [draftHasEditedRadius, setDraftHasEditedRadius] = useState(hasEditedRadius)
   const [draftModalCityQuery, setDraftModalCityQuery] = useState(modalCityQuery)
+  const [isModalSearchFocused, setIsModalSearchFocused] = useState(false)
 
   // Initialize draft state when modal opens
   useEffect(() => {
@@ -96,6 +104,7 @@ export function LocationModal({
     setModalCityQuery('') // Clear search query on apply
     // Close modal directly without resetting draft state
     onOpenChange(false)
+    onApply?.()
   }
 
   function handleClose() {
@@ -110,7 +119,7 @@ export function LocationModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-[680px] p-0 gap-0 overflow-hidden border-0"
+        className="sm:max-w-[628px] p-0 gap-0 overflow-hidden border-0"
         style={{
           borderRadius: 'var(--radius-card)',
           fontFamily: '"Open Sans", sans-serif',
@@ -166,30 +175,33 @@ export function LocationModal({
               </DialogDescription>
             </DialogHeader>
 
-            {/* City search input - matches header search styling */}
+            {/* City search input - matches CombinedSearchBar focus/blur border behavior */}
             <div
-              className="flex items-center mb-3"
+              className="flex items-center"
               style={{
                 width: '100%',
-                border: '1px solid #D0D0D0',
-                borderRadius: 'var(--radius-button)',
-                backgroundColor: '#FAFAFA',
-                minHeight: '44px',
-                marginTop: '16px', // 16px top padding above search bar
+                height: '44px',
+                border: `1px solid ${isModalSearchFocused ? MODAL_SEARCH_BORDER_FOCUS : MODAL_SEARCH_BORDER_DEFAULT}`,
+                borderRadius: '22px',
+                backgroundColor: '#FFFFFF',
+                marginTop: '16px',
+                marginBottom: draftModalCityQuery.trim() !== '' ? '4px' : '12px',
+                boxSizing: 'border-box',
+                transition: `border-color 150ms ${MODAL_SEARCH_BORDER_EASE}`,
               }}
             >
               <span
                 className="flex items-center justify-center shrink-0"
                 data-testid="modal-search-icon"
                 style={{
-                  paddingLeft: '12px',
+                  paddingLeft: '16px',
                   color: 'var(--color-icon-default)',
                   lineHeight: 1,
                   display: 'flex',
                   alignItems: 'center',
                 }}
               >
-                <Search size={20} />
+                <Search size={16} />
               </span>
               <input
                 type="text"
@@ -197,15 +209,24 @@ export function LocationModal({
                 placeholder={draftSelectedCities.length > 0 ? 'add city' : 'Search by city'}
                 value={draftModalCityQuery}
                 onChange={(e) => setDraftModalCityQuery(e.target.value)}
-                className="w-full py-2 text-base outline-none bg-transparent box-border"
+                onFocus={() => setIsModalSearchFocused(true)}
+                onBlur={() => setIsModalSearchFocused(false)}
+                className="w-full outline-none bg-transparent box-border placeholder:text-[#727272]"
                 style={{
+                  height: '44px',
                   paddingLeft: '8px',
                   paddingRight: draftModalCityQuery ? '4px' : '12px',
-                  fontFamily: '"Open Sans", sans-serif',
-                  fontSize: '16px',
-                  lineHeight: 1,
-                  color: 'var(--color-text-primary)',
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                  margin: 0,
                   border: 'none',
+                  lineHeight: '44px',
+                  fontFamily: '"Open Sans", sans-serif',
+                  fontSize: '14px',
+                  color: 'var(--color-text-primary)',
+                  background: 'transparent',
+                  outline: 'none',
+                  boxSizing: 'border-box',
                 }}
               />
               {draftModalCityQuery && (
@@ -214,54 +235,76 @@ export function LocationModal({
                   data-testid="modal-search-clear"
                   className="flex items-center justify-center shrink-0 cursor-pointer bg-transparent border-none p-0"
                   style={{
+                    width: '44px',
+                    height: '44px',
                     paddingRight: '10px',
                     color: 'var(--color-icon-default)',
                   }}
                   onClick={() => setDraftModalCityQuery('')}
                   aria-label="Clear search"
                 >
-                  <X size={18} />
+                  <X size={14} />
                 </button>
               )}
             </div>
 
             {/* City list - only show when typing */}
-            {draftModalCityQuery.trim() !== '' && (
+            {draftModalCityQuery.trim() !== '' && atMax && (
+              <p
+                className="text-sm py-2"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: '24px',
+                }}
+                data-testid="modal-max-locations-message"
+              >
+                You can only choose 3 locations
+              </p>
+            )}
+            {draftModalCityQuery.trim() !== '' && !atMax && filteredCities.length === 0 && (
+              <p
+                className="text-sm py-2"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: '24px',
+                }}
+                data-testid="modal-city-list"
+              >
+                No matching cities
+              </p>
+            )}
+            {draftModalCityQuery.trim() !== '' && !atMax && filteredCities.length > 0 && (
               <div
-                className="flex flex-col gap-1"
+                className="flex min-h-0 flex-col gap-1"
                 data-testid="modal-city-list"
                 style={{
-                  // Dynamic margin-bottom based on number of results
-                  // Fewer results = less space, more results = more space
-                  // This allows Selected locations to move up when there's less content
-                  // Add 8px more padding above Selected locations (4px + 4px)
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid var(--color-border-default)',
+                  borderRadius: 'var(--radius-card)',
+                  padding: '0px 0 0px 0',
+                  maxHeight: '166px',
+                  overflowY: 'auto',
                   marginBottom:
-                    filteredCities.length === 0
-                      ? '24px'
-                      : filteredCities.length === 1
-                        ? '16px'
-                        : filteredCities.length === 2
-                          ? '20px'
-                          : '24px',
+                    filteredCities.length === 1
+                      ? '16px'
+                      : filteredCities.length === 2
+                        ? '20px'
+                        : '24px',
                 }}
               >
-                {filteredCities.length === 0 ? (
-                  <p
-                    className="text-sm py-2"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                  >
-                    No matching cities
-                  </p>
-                ) : (
-                  filteredCities.map((city) => (
+                {filteredCities.map((city) => (
                     <button
                       key={city.id}
                       type="button"
                       data-testid={`city-option-${city.id}`}
                       disabled={atMax}
-                      className="flex items-center justify-between py-2 px-3 text-sm text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex shrink-0 items-center justify-between px-3 text-sm text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
-                        borderRadius: 'var(--radius-card)',
+                        height: '44px',
+                        minHeight: '44px',
+                        flexShrink: 0,
+                        lineHeight: 1,
+                        borderRadius: '4px', /* smaller radius avoids hover fill slivers in corners */
                         border: 'none',
                         background: 'transparent',
                         fontFamily: '"Open Sans", sans-serif',
@@ -280,17 +323,7 @@ export function LocationModal({
                     >
                       {city.name}
                     </button>
-                  ))
-                )}
-                {atMax && filteredCities.length > 0 && (
-                  <p
-                    className="text-xs mt-1"
-                    style={{ color: 'var(--color-text-secondary)' }}
-                    data-testid="max-cities-message"
-                  >
-                    Max {MAX_CITIES} locations
-                  </p>
-                )}
+                  ))}
               </div>
             )}
 
@@ -325,13 +358,20 @@ export function LocationModal({
                     <span
                       key={city.id}
                       data-testid={`chip-${city.id}`}
-                      className="inline-flex items-center gap-2 px-3 py-1 text-sm transition-colors"
+                      className="inline-flex items-center transition-colors"
                       style={{
-                        border: '1px solid #B7B7B7', // 20% darker than fill (#E5E5E5)
-                        borderRadius: '8px', // 8px radius like buttons
-                        backgroundColor: '#E5E5E5', // Darker fill (darker than subtle #EEEEEE)
+                        border: '1px solid #E2E2E2',
+                        borderRadius: 'var(--radius-chip)',
+                        backgroundColor: '#EEEEEE',
                         color: 'var(--color-text-primary)',
                         fontFamily: '"Open Sans", sans-serif',
+                        fontSize: '14px',
+                        lineHeight: 1.2,
+                        paddingLeft: '10px',
+                        paddingRight: '4px',
+                        paddingTop: '4px',
+                        paddingBottom: '4px',
+                        gap: '4px',
                         transitionDuration: 'var(--duration-fast)',
                       }}
                     >
@@ -339,15 +379,16 @@ export function LocationModal({
                       <button
                         type="button"
                         data-testid={`chip-remove-${city.id}`}
-                        className="inline-flex items-center justify-center cursor-pointer bg-transparent border-none p-0"
+                        className="flex items-center justify-center cursor-pointer bg-transparent border-none p-0 shrink-0"
                         style={{
+                          width: '20px',
+                          height: '20px',
                           color: 'var(--color-text-secondary)',
-                          marginTop: '1px', // Slight vertical adjustment to center with text
                         }}
                         onClick={() => handleRemoveCity(city.id)}
                         aria-label={`Remove ${city.name}`}
                       >
-                        <X size={14} />
+                        <X size={12} />
                       </button>
                     </span>
                   ))
@@ -370,30 +411,31 @@ export function LocationModal({
                   data-testid="radius-select"
                   value={draftRadiusMiles}
                   onChange={(e) => handleRadiusChange(Number(e.target.value))}
-                  className="w-full py-2 px-3 text-sm cursor-pointer"
+                  className="w-full text-sm cursor-pointer"
                   style={{
-                    border: '1px solid var(--color-border-default)',
+                    height: '44px',
+                    border: '1px solid #e2e2e2',
                     borderRadius: 'var(--radius-card)',
                     fontFamily: '"Open Sans", sans-serif',
+                    fontSize: '14px',
+                    lineHeight: 1.2,
                     color: 'var(--color-text-primary)',
-                    backgroundColor: 'var(--color-bg-page)',
-                    paddingRight: '36px', // Extra padding for dropdown icon
-                    outline: 'none', // Remove focus outline
-                    appearance: 'none', // Remove default browser styling
-                    WebkitAppearance: 'none', // Remove WebKit default styling
-                    MozAppearance: 'none', // Remove Firefox default styling
+                    backgroundColor: '#FFFFFF',
+                    paddingTop: '12px',
+                    paddingBottom: '12px',
+                    paddingLeft: '12px',
+                    paddingRight: '36px',
+                    outline: 'none',
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
+                    MozAppearance: 'none',
+                    boxSizing: 'border-box',
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.border = '1px solid var(--color-border-default)'
+                    e.currentTarget.style.border = '1px solid #BEBEBE'
                   }}
                   onBlur={(e) => {
-                    e.currentTarget.style.border = '1px solid var(--color-border-default)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.border = '1px solid var(--color-border-default)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.border = '1px solid var(--color-border-default)'
+                    e.currentTarget.style.border = '1px solid #E2E2E2'
                   }}
                 >
                   {RADIUS_OPTIONS.map((r) => (
@@ -417,15 +459,17 @@ export function LocationModal({
               <button
                 type="button"
                 data-testid="modal-apply"
-                className="w-full py-2 text-sm font-semibold text-white cursor-pointer transition-colors"
+                className="flex items-center justify-center w-full text-sm font-semibold text-white cursor-pointer transition-colors"
                 style={{
+                  height: '44px',
+                  lineHeight: 1,
                   backgroundColor: 'var(--color-link-default)',
                   borderRadius: 'var(--radius-button)',
                   border: 'none',
                   fontFamily: '"Open Sans", sans-serif',
                   transitionDuration: 'var(--duration-fast)',
                   transitionProperty: 'background-color',
-                  color: 'white', // Ensure text stays white
+                  color: 'white',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = '#0018B8' // Darker blue, only affects background
@@ -437,7 +481,7 @@ export function LocationModal({
                 }}
                 onClick={handleApply}
               >
-                Apply
+                Update
               </button>
             </div>
           </div>

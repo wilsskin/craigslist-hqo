@@ -1,37 +1,36 @@
-import type { TaxonomySection } from '@/data/types'
-import { TaxonomySectionBlock } from './TaxonomySectionBlock'
+import { useMemo } from 'react'
+import { getItemsForTab } from '@/data/tabMapping'
+import { itemMatchesQuery } from '@/lib/searchTaxonomy'
+import { IconGrid } from '@/components/IconGrid'
 
 interface MainContentShellProps {
-  /** Sections to render (filtered or full). */
-  sections: TaxonomySection[]
-  /** Total match count from filtering. -1 means no search is active. */
-  matchCount: number
-  /** Callback to clear the search query (used in empty state). */
+  activeTab: string
+  searchQuery: string
   onClearSearch: () => void
 }
 
-/**
- * Main content column: renders taxonomy sections.
- *
- * Design system spacing:
- * - Between category blocks: 32px
- * - Top padding: 16px (aligns with left rail top padding)
- */
 export function MainContentShell({
-  sections,
-  matchCount,
+  activeTab,
+  searchQuery,
   onClearSearch,
 }: MainContentShellProps) {
-  const isSearching = matchCount !== -1
+  const allItems = useMemo(() => getItemsForTab(activeTab), [activeTab])
+
+  const filtered = useMemo(() => {
+    if (!searchQuery) return allItems
+    return allItems.filter(({ item }) =>
+      itemMatchesQuery(item.label, searchQuery),
+    )
+  }, [allItems, searchQuery])
 
   return (
     <main
       data-testid="main-content-shell"
-      className="flex-1 min-w-0 pt-4"
-      style={{ paddingBottom: '64px' }}
+      className="w-full"
+      style={{ paddingTop: '16px', paddingBottom: '64px' }}
     >
       {/* Empty state */}
-      {isSearching && matchCount === 0 && (
+      {searchQuery && filtered.length === 0 ? (
         <div
           data-testid="search-empty-state"
           className="flex flex-col items-center justify-center py-16"
@@ -57,8 +56,10 @@ export function MainContentShell({
           <button
             type="button"
             data-testid="empty-state-clear"
-            className="px-4 py-2 text-sm font-semibold text-white cursor-pointer"
+            className="flex items-center justify-center px-4 py-2 text-sm font-semibold text-white cursor-pointer"
             style={{
+              height: '44px',
+              lineHeight: 1,
               backgroundColor: 'var(--color-link-default)',
               borderRadius: 'var(--radius-button)',
               border: 'none',
@@ -69,15 +70,8 @@ export function MainContentShell({
             Clear search
           </button>
         </div>
-      )}
-
-      {/* Taxonomy sections */}
-      {sections.length > 0 && (
-        <div className="flex flex-col" style={{ gap: '32px' }}>
-          {sections.map((section) => (
-            <TaxonomySectionBlock key={section.id} section={section} />
-          ))}
-        </div>
+      ) : (
+        <IconGrid items={filtered} />
       )}
     </main>
   )

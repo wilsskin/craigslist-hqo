@@ -80,6 +80,12 @@ Rhythm rules:
 - Horizontal padding:
   - Desktop: 24px
   - Mobile: 16px
+### Grid and Container (Sprint 9)
+- `layout.container.width`: 768px (centered content max-width)
+- `layout.container.padding`: 24px (left and right)
+- `layout.grid.columns`: 8
+- `layout.grid.gap`: 16px
+- `layout.card.icon`: 82px (1 column = 768px − 7×16px gaps ÷ 8)
 ### Radius
 - `radius.input`: 4px
 - `radius.card`: 8px
