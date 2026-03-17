@@ -1,6 +1,17 @@
 import '@testing-library/jest-dom/vitest'
 import { vi } from 'vitest'
 
+// JSDOM doesn’t implement canvas. Our app uses a canvas-backed measureText helper
+// for the header location label, so tests need a minimal stub.
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  value: function getContext() {
+    return {
+      font: '',
+      measureText: (text: string) => ({ width: text.length * 8 }),
+    }
+  },
+})
+
 vi.mock('maplibre-gl', () => ({
   default: {
     Map: class {
